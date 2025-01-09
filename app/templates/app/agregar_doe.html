@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Agregar DOE</title>
+</head>
+<body>
+    <h1>Agregar Nuevo DOE</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Guardar</button>
+    </form>
+    <a href="{% url 'listar_doe' %}">Regresar a la lista</a>
+</body>
+</html>

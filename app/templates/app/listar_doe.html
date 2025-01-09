@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lista de DOE</title>
+</head>
+<body>
+    <h1>Lista de DOE</h1>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Título</th>
+            <th>Descripción</th>
+            <th>Fecha de Creación</th>
+            <th>Creado por</th>
+        </tr>
+        {% for doe in doe_list %}
+        <tr>
+            <td>{{ doe.id }}</td>
+            <td>{{ doe.titulo }}</td>
+            <td>{{ doe.descripcion }}</td>
+            <td>{{ doe.fecha_creacion }}</td>
+            <td>{{ doe.creado_por.nombre }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
