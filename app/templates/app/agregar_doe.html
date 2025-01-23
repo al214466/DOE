@@ -1,15 +1,124 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agregar DOE</title>
+    {% load static %}
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 70px;
+            background-color: #005b8e;
+            color: white;
+            padding: 10px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 0;
+            width: 100%;
+            font-size: 1.5rem;
+        }
+        .sidebar a:hover {
+            background-color: #0077b6;
+            border-radius: 5px;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+        .navbar {
+            background-color: #005b8e;
+            color: white;
+        }
+        .form-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .form-container h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #005b8e;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #005b8e;
+            border-color: #005b8e;
+        }
+        .btn-primary:hover {
+            background-color: #0077b6;
+            border-color: #0077b6;
+        }
+    </style>
 </head>
 <body>
-    <h1>Agregar Nuevo DOE</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Guardar</button>
-    </form>
-    <a href="{% url 'listar_doe' %}">Regresar a la lista</a>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="{% url 'listar_doe' %}" title="Inicio"><i class="fas fa-home icon"></i></a>
+        <a href="#" title="Estadísticas"><i class="fas fa-chart-line icon"></i></a>
+        <a href="#" title="Cerrar Sesión"><i class="fas fa-sign-out-alt icon"></i></a>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+        <nav class="navbar navbar-expand-lg">
+            <div class="container-fluid">
+                <span class="navbar-brand mb-0 h1">Agregar Nuevo DOE</span>
+            </div>
+        </nav>
+        <div class="container mt-4">
+            <div class="form-container">
+                <h2>Agregar Nuevo DOE</h2>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="titulo">Título</label>
+                        <input type="text" class="form-control" id="titulo" name="titulo" placeholder="Ingrese el título">
+                    </div>
+                    <div class="form-group">
+                        <label for="descripcion">Descripción</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="4" placeholder="Ingrese la descripción"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="archivo">Subir Archivo</label>
+                        <input type="file" class="form-control" id="archivo" name="archivo">
+                    </div>
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'listar_doe' %}" class="btn btn-secondary">Regresar</a>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                    
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
 </body>
 </html>

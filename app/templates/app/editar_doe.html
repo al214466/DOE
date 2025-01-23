@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar DOE</title>
+    {% load static %}
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 70px;
+            background-color: #005b8e;
+            color: white;
+            padding: 10px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 0;
+            width: 100%;
+            font-size: 1.5rem;
+        }
+        .sidebar a:hover {
+            background-color: #0077b6;
+            border-radius: 5px;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+        .navbar {
+            background-color: #005b8e;
+            color: white;
+        }
+        .progress-bar {
+            background-color: #0077b6;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="{% url 'listar_doe' %}" title="Inicio"><i class="fas fa-home icon"></i></a>
+        <a href="#" title="Estadísticas"><i class="fas fa-chart-line icon"></i></a>
+        <a href="#" title="Cerrar Sesión"><i class="fas fa-sign-out-alt icon"></i></a>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+        <nav class="navbar navbar-expand-lg">
+            <div class="container-fluid">
+                <span class="navbar-brand mb-0 h1">Editar DOE</span>
+            </div>
+        </nav>
+        <div class="container mt-4">
+            <h2>{{ doe.nombre }}</h2>
+            <div class="progress my-4">
+                <div class="progress-bar" role="progressbar" style="width: {{ progreso }}%;" aria-valuenow="{{ progreso }}" aria-valuemin="0" aria-valuemax="100">{{ progreso }}%</div>
+            </div>
+
+            {% if permitir_subir_archivos %}
+            <h4>Data Mining	</h4>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ archivo_form.as_p }}
+                <button type="submit" class="btn btn-primary">Subir Archivo</button>
+            </form>
+            {% else %}
+            <h4>Archivos Subidos en Fase Anterior</h4>
+            <ul>
+                {% for archivo in archivos_anteriores %}
+                <li>
+                    <a href="{{ archivo.archivo.url }}" target="_blank">{{ archivo.archivo.name }}</a>
+                </li>
+                {% empty %}
+                <li>No hay archivos subidos para la fase anterior.</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            {% if campos_infrastructure %}
+            <h4>Infrastructure and Material</h4>
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="rk_sn">RK SN:</label>
+                    <input type="text" id="rk_sn" name="rk_sn" class="form-control" placeholder="Ingrese RK SN">
+                </div>
+                <div class="form-group mt-3">
+                    <label for="rn_number">RN NUMBER:</label>
+                    <input type="text" id="rn_number" name="rn_number" class="form-control" placeholder="Ingrese RN Number">
+                </div>
+                <div class="form-group mt-3">
+                    <label for="unit_sn">UNIT SN:</label>
+                    <input type="text" id="unit_sn" name="unit_sn" class="form-control" placeholder="Ingrese Unit SN">
+                </div>
+                <div class="form-group mt-3">
+                    <label for="bay">Bay:</label>
+                    <input type="text" id="bay" name="bay" class="form-control" placeholder="Ingrese Bay">
+                </div>
+
+                <h5 class="mt-4">Materiales</h5>
+                <div id="materiales-container">
+                    <div class="row mt-2">
+                        <div class="col-md-4">
+                            <input type="text" name="material" class="form-control" placeholder="Material">
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" name="material_sn" class="form-control" placeholder="SN">
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" name="material_pn" class="form-control" placeholder="PN">
+                        </div>
+                    </div>
+                </div>
+                <button type="button" id="add-material" class="btn btn-secondary mt-3">Agregar Material</button>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'listar_doe' %}" class="btn btn-secondary">Regresar</a>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    <script>
+        document.getElementById('add-material').addEventListener('click', function() {
+            const container = document.getElementById('materiales-container');
+            const row = document.createElement('div');
+            row.classList.add('row', 'mt-2');
+            row.innerHTML = `
+                <div class="col-md-4">
+                    <input type="text" name="material" class="form-control" placeholder="Material">
+                </div>
+                <div class="col-md-4">
+                    <input type="text" name="material_sn" class="form-control" placeholder="SN">
+                </div>
+                <div class="col-md-4">
+                    <input type="text" name="material_pn" class="form-control" placeholder="PN">
+                </div>
+            `;
+            container.appendChild(row);
+        });
+    </script>
+</body>
+</html>
