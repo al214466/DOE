@@ -182,8 +182,7 @@
                                     </td>
                                     <td>
                                         <a href="{% url 'editar_doe' doe.id %}" class="text-primary"><i class="fas fa-edit"></i></a>
-                                        <a href="{% url 'ver_archivos' doe.id %}" class="text-warning"><i class="fas fa-folder"></i></a>
-                                        <a href="{% url 'ver_estadisticas' doe.id %}" class="text-primary"><i class="fas fa-chart-bar"></i></a>
+
                                         <a href="{% url 'chat_doe' doe.id %}" class="text-primary"><i class="fas fa-comments"></i></a>
                                         {% if user.rol == "Sr" %}
                                             <a href="#" class="text-danger eliminar-doe" data-doe-id="{{ doe.id }}">
