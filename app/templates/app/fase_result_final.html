@@ -1,0 +1,77 @@
+{% extends 'app/editar_doe.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-primary text-center">📊 Result Final - {{ doe.nombre }}</h2>
+
+    <div class="card p-5 shadow-lg border-0" style="max-width: 700px; margin: auto; background-color: #ffffff; border-radius: 15px;">
+        
+        <!-- 📑 PPT Final -->
+        <h3 class="text-center mb-3">📑 PPT Final</h3>
+        <div class="list-group shadow-sm mb-3">
+            {% for ppt in ppts %}
+                <a href="{{ ppt.file.url }}" class="list-group-item list-group-item-action" target="_blank">
+                    📄 Archivo subido el {{ ppt.uploaded_at|date:"M. d, Y, h:i a" }}
+                </a>
+            {% empty %}
+                <div class="list-group-item text-muted text-center">❌ No hay archivos subidos</div>
+            {% endfor %}
+        </div>
+
+        <!-- Formulario para subir PPT Final -->
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="input-group shadow-sm">
+                {{ ppt_form.file|add_class:"form-control small-input rounded-pill border-primary shadow-sm" }}
+                <button type="submit" name="add_ppt" class="btn btn-warning shadow-sm rounded-pill">📤 Subir PPT</button>
+            </div>
+        </form>
+
+        <hr>
+
+        <!-- 📝 Breve Conclusión -->
+        <h3 class="text-center mt-4">📝 Breve Conclusión</h3>
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-4">
+                {{ form.conclusion|add_class:"form-control small-input rounded-pill border-primary shadow-sm" }}
+            </div>
+            <button type="submit" name="save_conclusion" class="btn btn-success w-100 py-2 rounded-pill shadow-lg">✅ Guardar y Finalizar</button>
+        </form>
+
+    </div>
+</div>
+
+<style>
+    .small-input {
+        font-size: 1rem;
+        padding: 12px;
+        border-radius: 10px;
+        transition: all 0.3s ease-in-out;
+    }
+    .small-input:focus {
+        border-color: #007bff;
+        box-shadow: 0px 0px 10px rgba(0, 123, 255, 0.3);
+    }
+    .btn-primary {
+        background-color: #005b8e;
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    .btn-primary:hover {
+        background-color: #0077b6;
+        transform: scale(1.05);
+    }
+    .card {
+        transition: transform 0.3s ease-in-out;
+    }
+    .card:hover {
+        transform: scale(1.02);
+    }
+</style>    
+
+{% endblock %}

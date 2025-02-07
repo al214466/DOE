@@ -1,0 +1,119 @@
+{% extends 'app/editar_doe.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-primary text-center">⚡ Ejecución - {{ doe.nombre }}</h2>
+
+    <div class="card p-5 shadow-lg border-0" style="max-width: 700px; margin: auto; background-color: #ffffff; border-radius: 15px;">
+        
+        <!-- 📌 Sección de Links -->
+        <h3 class="text-center mb-3">🔗 Links</h3>
+        <div class="list-group shadow-sm mb-3">
+            {% for link in links %}
+                <a href="{{ link.url }}" class="list-group-item list-group-item-action" target="_blank">{{ link.url }}</a>
+            {% empty %}
+                <div class="list-group-item text-muted text-center">❌ No hay links agregados</div>
+            {% endfor %}
+        </div>
+
+        <!-- Formulario para agregar Link -->
+        <form method="post">
+            {% csrf_token %}
+            <div class="input-group shadow-sm">
+                {{ link_form.url|add_class:"form-control small-input rounded-pill border-primary shadow-sm" }}
+                <button type="submit" name="add_link" class="btn btn-success shadow-sm rounded-pill">➕ Agregar Link</button>
+            </div>
+        </form>
+
+        <hr>
+
+        <!-- 📄 Executive Summary Previously -->
+        <h3 class="text-center mt-4">📄 Executive Summary</h3>
+        <div class="list-group shadow-sm mb-3">
+            {% for summary in summaries %}
+                <a href="{{ summary.file.url }}" class="list-group-item list-group-item-action" target="_blank">
+                    📄 Archivo subido el {{ summary.uploaded_at|date:"M. d, Y, h:i a" }}
+                </a>
+            {% empty %}
+                <div class="list-group-item text-muted text-center">❌ No hay archivos subidos</div>
+            {% endfor %}
+        </div>
+
+        <!-- Formulario para agregar Executive Summary -->
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="input-group shadow-sm">
+                {{ summary_form.file|add_class:"form-control small-input rounded-pill border-primary shadow-sm" }}
+                <button type="submit" name="add_summary" class="btn btn-warning shadow-sm rounded-pill">📄 Subir Archivo</button>
+            </div>
+        </form>
+
+        <hr>
+
+        <!-- 📌 Status per PIC -->
+        <h3 class="text-center mt-4">📌 Status per PIC</h3>
+        <div class="list-group shadow-sm">
+            {% for status in statuses %}
+                <div class="list-group-item">
+                    <strong>📌 {{ status.status }}</strong> - 🕒 {{ status.created_at|date:"M. d, Y, h:i a" }} - 🧑‍💻 {{ status.user }}
+                </div>
+            {% empty %}
+                <div class="list-group-item text-muted text-center">❌ No hay status agregados</div>
+            {% endfor %}
+        </div>
+
+        <!-- Formulario para agregar Status -->
+        <form method="post">
+            {% csrf_token %}
+            <div class="input-group shadow-sm mt-3">
+                {{ status_form.status|add_class:"form-control small-input rounded-pill border-primary shadow-sm" }}
+                <button type="submit" name="add_status" class="btn btn-success shadow-sm rounded-pill">➕ Agregar Status</button>
+            </div>
+        </form>
+
+        <hr>
+
+        <!-- ✅ Botón para avanzar de fase -->
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="save_and_continue" class="btn btn-primary w-100 py-2 rounded-pill shadow-lg mt-4">
+                ✅ Guardar y Continuar
+            </button>
+        </form>
+
+    </div>
+</div>
+
+<style>
+    .small-input {
+        font-size: 1rem;
+        padding: 12px;
+        border-radius: 10px;
+        transition: all 0.3s ease-in-out;
+    }
+    .small-input:focus {
+        border-color: #007bff;
+        box-shadow: 0px 0px 10px rgba(0, 123, 255, 0.3);
+    }
+    .btn-primary {
+        background-color: #005b8e;
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    .btn-primary:hover {
+        background-color: #0077b6;
+        transform: scale(1.05);
+    }
+    .card {
+        transition: transform 0.3s ease-in-out;
+    }
+    .card:hover {
+        transform: scale(1.02);
+    }
+</style>    
+
+{% endblock %}

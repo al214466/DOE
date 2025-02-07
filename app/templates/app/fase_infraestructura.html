@@ -1,0 +1,150 @@
+{% extends 'app/editar_doe.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-primary text-center">🏗️ Infraestructura - {{ doe.nombre }}</h2>
+
+    <div class="card p-5 shadow-lg border-0" style="max-width: 650px; margin: auto; background-color: #ffffff; border-radius: 15px;">
+        
+        <!-- Formulario principal -->
+        <form method="post">
+            {% csrf_token %}
+        
+            <div class="mb-4">
+                <label class="form-label text-dark"><strong>🛠️ ¿Recolección de Material?</strong></label>
+                <select id="tipo_material" class="form-select small-input rounded-pill border-primary shadow-sm" onchange="toggleMaterialForm()" name="collect_material">
+                    <option value="">Seleccione una opción</option>
+                    <option value="material" {% if form.collect_material.value == "material" %}selected{% endif %}>Material</option>
+                    <option value="unidad" {% if form.collect_material.value == "unidad" %}selected{% endif %}>Unidad</option>
+                </select>
+            </div>
+
+            <button type="submit" name="save_and_continue" class="btn btn-primary w-100 py-2 rounded-pill shadow-lg mt-4">
+                ⚙️ Guardar y Continuar
+            </button>
+        </form>
+
+        <hr>
+
+        <!-- Formulario Material -->
+        <form method="post">
+            {% csrf_token %}
+            <div id="material-form" class="hidden">
+                <div class="mb-4">
+                    <label class="form-label text-dark"><strong>📦 Material</strong></label>
+                    {{ material_form.material_name|add_class:"form-control small-input rounded-pill border-primary shadow-sm" }}
+                </div>
+                <div class="mb-4">
+                    <label class="form-label text-dark"><strong>🔢 Número de Serie</strong></label>
+                    {{ material_form.material_sn|add_class:"form-control small-input rounded-pill border-primary shadow-sm" }}
+                </div>
+                <div class="mb-4">
+                    <label class="form-label text-dark"><strong>📌 Número de Parte</strong></label>
+                    {{ material_form.material_pn|add_class:"form-control small-input rounded-pill border-primary shadow-sm" }}
+                </div>
+                <button type="submit" name="add_material" class="btn btn-secondary w-100 py-2 rounded-pill shadow-lg">➕ Agregar Material</button>
+            </div>
+        </form>
+
+        <hr>
+
+        <!-- Formulario Unidad -->
+        <form method="post">
+            {% csrf_token %}
+            <div id="unidad-form" class="hidden">
+                <div class="mb-4">
+                    <label class="form-label text-dark"><strong>🔢 Unit SN</strong></label>
+                    {{ unidad_form.rack_sn|add_class:"form-control small-input rounded-pill border-primary shadow-sm" }}
+                </div>
+                <div class="mb-4">
+                    <label class="form-label text-dark"><strong>📋 RK Number</strong></label>
+                    {{ unidad_form.rn_number|add_class:"form-control small-input rounded-pill border-primary shadow-sm" }}
+                </div>
+                <div class="mb-4">
+                    <label class="form-label text-dark"><strong>🆔 RK SN</strong></label>
+                    {{ unidad_form.unit_sn|add_class:"form-control small-input rounded-pill border-primary shadow-sm" }}
+                </div>
+                <div class="mb-4">
+                    <label class="form-label text-dark"><strong>📍 Ubicación (Bay)</strong></label>
+                    {{ unidad_form.bay|add_class:"form-control small-input rounded-pill border-primary shadow-sm" }}
+                </div>
+                <button type="submit" name="add_unidad" class="btn btn-secondary w-100 py-2 rounded-pill shadow-lg">➕ Agregar Unidad</button>
+            </div>
+        </form>
+
+        <hr>
+
+        <h3 class="text-center mt-4">📋 Materiales y Unidades Agregadas</h3>
+        <div class="list-group shadow-sm">
+            {% for material in materials %}
+                <div class="list-group-item">
+                    <strong>📦 {{ material.material_name }}</strong> - 🔢 SN: {{ material.material_sn }} - 📌 PN: {{ material.material_pn }}
+                </div>
+            {% endfor %}
+            {% for unidad in unidades %}
+                <div class="list-group-item">
+                    <strong>🛠️ Unidad: {{ unidad.rack_sn }}</strong> - 🏷️ RN: {{ unidad.rn_number }} - 🔢 SN: {{ unidad.unit_sn }} - 📍 {{ unidad.bay }}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .small-input {
+        font-size: 1rem;
+        padding: 12px;
+        border-radius: 10px;
+        transition: all 0.3s ease-in-out;
+    }
+    .small-input:focus {
+        border-color: #007bff;
+        box-shadow: 0px 0px 10px rgba(0, 123, 255, 0.3);
+    }
+    .input-group-text {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        font-size: 1.2rem;
+        padding: 10px;
+        border-radius: 10px 0 0 10px;
+    }
+    .btn-primary {
+        background-color: #005b8e;
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    .btn-primary:hover {
+        background-color: #0077b6;
+        transform: scale(1.05);
+    }
+    .card {
+        transition: transform 0.3s ease-in-out;
+    }
+    .card:hover {
+        transform: scale(1.02);
+    }
+</style>
+
+<script>
+    function toggleMaterialForm() {
+        let tipo = document.getElementById("tipo_material").value;
+        let materialForm = document.getElementById("material-form");
+        let unidadForm = document.getElementById("unidad-form");
+
+        materialForm.style.display = (tipo === "material") ? "block" : "none";
+        unidadForm.style.display = (tipo === "unidad") ? "block" : "none";
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        toggleMaterialForm();
+        document.getElementById("tipo_material").addEventListener("change", toggleMaterialForm);
+    });
+</script>
+
+
+{% endblock %}

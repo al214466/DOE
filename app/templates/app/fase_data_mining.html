@@ -1,0 +1,73 @@
+{% extends 'app/editar_doe.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-primary text-center">🧩 Data Mining - {{ doe.nombre }}</h2>
+
+    <div class="card p-5 shadow-lg border-0" style="max-width: 650px; margin: auto; background-color: #ffffff; border-radius: 15px;">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="mb-4">
+                <label class="form-label text-dark"><strong><i class="fas fa-exclamation-circle"></i> Issue:</strong></label>
+                {{ form.issue|add_class:"form-control small-input rounded-pill border-primary shadow-sm" }}
+            </div>            
+
+            <div class="mb-4">
+                <label class="form-label text-dark"><strong><i class="fas fa-file-upload"></i> Excel Data:</strong></label>
+                <div class="input-group shadow-sm">
+                    <label class="input-group-text bg-primary text-white" for="id_excel_data"><i class="fas fa-file-excel"></i></label>
+                    {{ form.excel_data|add_class:"form-control small-input rounded-pill border-primary" }}
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label text-dark"><strong><i class="fas fa-comment-alt"></i> DR:</strong></label>
+                {{ form.dr|add_class:"form-control small-input rounded-pill border-primary shadow-sm" }}
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill shadow-lg">🚀 Guardar y Continuar</button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .small-input {
+        font-size: 1rem;
+        padding: 12px;
+        border-radius: 10px;
+        transition: all 0.3s ease-in-out;
+    }
+    .small-input:focus {
+        border-color: #007bff;
+        box-shadow: 0px 0px 10px rgba(0, 123, 255, 0.3);
+    }
+    .input-group-text {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        font-size: 1.2rem;
+        padding: 10px;
+        border-radius: 10px 0 0 10px;
+    }
+    .btn-primary {
+        background-color: #005b8e;
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    .btn-primary:hover {
+        background-color: #0077b6;
+        transform: scale(1.05);
+    }
+    .card {
+        transition: transform 0.3s ease-in-out;
+    }
+    .card:hover {
+        transform: scale(1.02);
+    }
+</style>
+{% endblock %}

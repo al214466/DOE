@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - {{ doe.titulo }}</title>
+    {% load static %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .chat-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .chat-box {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f0f0f0;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            max-width: 75%;
+            word-wrap: break-word;
+        }
+        .message.sent {
+            background-color: #007bff;
+            color: white;
+            align-self: flex-end;
+        }
+        .message.received {
+            background-color: #e9ecef;
+            color: black;
+            align-self: flex-start;
+        }
+        .message img {
+            max-width: 200px;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+        .input-group {
+            margin-top: 10px;
+        }
+        .btn-primary {
+            background-color: #005b8e;
+            border-color: #005b8e;
+        }
+        .btn-primary:hover {
+            background-color: #0077b6;
+            border-color: #0077b6;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <a href="{% url 'listar_doe' %}" title="Inicio"><i class="fas fa-home icon"></i></a>
+        <a href="#" title="Estadísticas"><i class="fas fa-chart-line icon"></i></a>
+    
+        <!-- SOLO PARA INGENIEROS: Botón para Equipos -->
+        {% if user.rol == "Sr" %}
+            <a href="{% url 'crear_equipo' %}" title="Crear Equipos">
+                <i class="fas fa-users icon"></i> <!-- Icono de equipo -->
+            </a>
+        {% endif %}
+    
+        <a href="#" title="Cerrar Sesión"><i class="fas fa-sign-out-alt icon"></i></a>
+    </div>
+    <div class="container chat-container">
+        <h2 class="text-center mb-4">Chat del DOE: {{ doe.titulo }}</h2>
+        <div id="chat-mensajes" class="chat-box d-flex flex-column">
+            {% for mensaje in mensajes %}
+                <div class="message {% if mensaje.usuario == user %}sent{% else %}received{% endif %}" data-id="{{ mensaje.id }}">
+                    <strong>{{ mensaje.usuario.username }}</strong>: {{ mensaje.mensaje }}
+                    {% if mensaje.imagen %}
+                        <br>
+                        <img src="{{ mensaje.imagen.url }}" alt="Imagen enviada" style="max-width: 200px; border-radius: 5px;">
+                    {% endif %}
+                    {% if mensaje.usuario == user %}
+                        <button class="btn btn-danger btn-sm eliminar-mensaje" data-id="{{ mensaje.id }}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="input-group">
+            <input type="text" id="mensaje" class="form-control" placeholder="Escribe un mensaje..." />
+            <input type="file" id="imagen" accept="image/*" class="form-control" style="max-width: 200px;">
+            <button class="btn btn-primary" onclick="enviarMensaje()"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script>
+        const doeId = "{{ doe.id }}";  
+        const chatMensajes = document.getElementById("chat-mensajes");
+        const mensajeInput = document.getElementById("mensaje");
+        const imagenInput = document.getElementById("imagen");
+    
+        // WebSocket para el chat en tiempo real
+        const chatSocket = new WebSocket("ws://" + window.location.host + "/ws/chat/" + doeId + "/");
+    
+        chatSocket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            agregarMensajeAlChat(data.usuario, data.mensaje, data.imagen, false);
+        };
+    
+        function agregarMensajeAlChat(usuario, mensaje, imagen, enviadoPorUsuario) {
+            let mensajeDiv = document.createElement("div");
+            mensajeDiv.classList.add("message");
+            mensajeDiv.classList.add(enviadoPorUsuario ? "sent" : "received");
+    
+            mensajeDiv.innerHTML = `<strong>${usuario}</strong>: ${mensaje}`;
+    
+            if (imagen) {
+                mensajeDiv.innerHTML += `<br><img src="${imagen}" style="max-width: 200px; border-radius: 5px;">`;
+            }
+    
+            chatMensajes.appendChild(mensajeDiv);
+            chatMensajes.scrollTop = chatMensajes.scrollHeight;
+        }
+    
+        function enviarMensaje() {
+            const mensaje = mensajeInput.value.trim();
+            if (!mensaje && imagenInput.files.length === 0) return;
+    
+            let reader = new FileReader();
+            reader.onload = function (event) {
+                chatSocket.send(JSON.stringify({
+                    mensaje: mensaje,
+                    imagen: event.target.result || null,
+                }));
+    
+                fetch("/guardar_mensaje_chat/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({
+                        doe_id: doeId,
+                        mensaje: mensaje,
+                        imagen: event.target.result || null
+                    })
+                });
+    
+                agregarMensajeAlChat("Tú", mensaje, event.target.result, true);
+            };
+    
+            if (imagenInput.files.length > 0) {
+                reader.readAsDataURL(imagenInput.files[0]);
+            } else {
+                chatSocket.send(JSON.stringify({ mensaje: mensaje }));
+    
+                fetch("/guardar_mensaje_chat/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({
+                        doe_id: doeId,
+                        mensaje: mensaje
+                    })
+                });
+    
+                agregarMensajeAlChat("Tú", mensaje, null, true);
+            }
+    
+            mensajeInput.value = "";
+            imagenInput.value = "";
+        }
+    
+        // 🔹 **Cargar el historial de mensajes al abrir el chat**
+        function cargarHistorialMensajes() {
+            fetch(`/obtener_mensajes_chat/${doeId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    chatMensajes.innerHTML = "";
+                    data.forEach(msg => {
+                        agregarMensajeAlChat(msg.usuario, msg.mensaje, msg.imagen, msg.usuario === "{{ user.username }}");
+                    });
+                });
+        }
+    
+        // **Ejecutar cuando la página cargue**
+        document.addEventListener("DOMContentLoaded", cargarHistorialMensajes);
+        document.addEventListener("DOMContentLoaded", function () {
+    document.querySelector("#chat-mensajes").addEventListener("click", function (event) {
+        if (event.target.classList.contains("eliminar-mensaje")) {
+            let mensajeId = event.target.getAttribute("data-id");
+
+            fetch(`/eliminar_mensaje/${mensajeId}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/json",
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Ocultar el mensaje eliminado
+                    document.querySelector(`.message[data-id='${mensajeId}']`).remove();
+                } else {
+                    alert("No se pudo eliminar el mensaje.");
+                }
+            })
+            .catch(error => console.error("Error al eliminar el mensaje:", error));
+        }
+    });
+});
+    </script>
+</body>
+</html>

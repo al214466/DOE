@@ -76,13 +76,19 @@
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
     <div class="sidebar">
         <a href="{% url 'listar_doe' %}" title="Inicio"><i class="fas fa-home icon"></i></a>
         <a href="#" title="Estadísticas"><i class="fas fa-chart-line icon"></i></a>
+    
+        <!-- SOLO PARA INGENIEROS: Botón para Equipos -->
+        {% if user.rol == "Sr" %}
+            <a href="{% url 'crear_equipo' %}" title="Crear Equipos">
+                <i class="fas fa-users icon"></i> <!-- Icono de equipo -->
+            </a>
+        {% endif %}
+    
         <a href="#" title="Cerrar Sesión"><i class="fas fa-sign-out-alt icon"></i></a>
     </div>
-
     <!-- Content -->
     <div class="content">
         <nav class="navbar navbar-expand-lg">
@@ -95,24 +101,63 @@
                 <h2>Agregar Nuevo DOE</h2>
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
+                    
                     <div class="form-group">
                         <label for="titulo">Título</label>
                         <input type="text" class="form-control" id="titulo" name="titulo" placeholder="Ingrese el título">
                     </div>
+                
                     <div class="form-group">
                         <label for="descripcion">Descripción</label>
                         <textarea class="form-control" id="descripcion" name="descripcion" rows="4" placeholder="Ingrese la descripción"></textarea>
                     </div>
+                
+                    <!-- Dropdown de Prioridad -->
                     <div class="form-group">
-                        <label for="archivo">Subir Archivo</label>
-                        <input type="file" class="form-control" id="archivo" name="archivo">
+                        <label for="prioridad">Prioridad</label>
+                        <div class="dropdown">
+                            <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="prioridadDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                Seleccionar Prioridad
+                            </button>
+                            <ul class="dropdown-menu w-100" aria-labelledby="prioridadDropdown">
+                                <li><a class="dropdown-item text-danger fw-bold" href="#" onclick="seleccionarPrioridad('High', 'danger')">🔴 High</a></li>
+                                <li><a class="dropdown-item text-primary fw-bold" href="#" onclick="seleccionarPrioridad('Medium', 'primary')">🔵 Medium</a></li>
+                                <li><a class="dropdown-item text-success fw-bold" href="#" onclick="seleccionarPrioridad('Low', 'success')">🟢 Low</a></li>
+                            </ul>
+                        </div>
+                        <input type="hidden" name="prioridad" id="prioridadInput">
                     </div>
+                
+                    <!-- Campo para subir archivo "First Level from TE" -->
+                    <div class="form-group">
+                        <label for="archivo_te">First Level from TE</label>
+                        <input type="file" class="form-control" id="archivo_te" name="archivo_te">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="equipo">Asignar Equipo</label>
+                        <select class="form-control" id="equipo" name="equipo">
+                            <option value="">Selecciona un equipo</option>
+                            {% for equipo in equipos %}
+                                <option value="{{ equipo.id }}">{{ equipo.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                
                     <div class="d-flex justify-content-between mt-4">
                         <a href="{% url 'listar_doe' %}" class="btn btn-secondary">Regresar</a>
                         <button type="submit" class="btn btn-primary">Guardar</button>
                     </div>
-                    
                 </form>
+                
+                <!-- Script para actualizar el botón de prioridad -->
+                <script>
+                    function seleccionarPrioridad(valor, color) {
+                        document.getElementById("prioridadDropdown").innerHTML = valor;
+                        document.getElementById("prioridadDropdown").classList = "btn btn-" + color + " dropdown-toggle w-100";
+                        document.getElementById("prioridadInput").value = valor;
+                    }
+                </script>
             </div>
         </div>
     </div>

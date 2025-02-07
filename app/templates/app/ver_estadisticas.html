@@ -1,0 +1,27 @@
+<h2>Estadísticas de {{ doe.titulo }}</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Fase</th>
+            <th>Inicio</th>
+            <th>Fin</th>
+            <th>Duración</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for fase in doe.fases.all %}
+        <tr>
+            <td>{{ fase.get_nombre_fase_display }}</td>
+            <td>{{ fase.fecha_inicio }}</td>
+            <td>{{ fase.fecha_finalizacion|default:"En progreso" }}</td>
+            <td>
+                {% if fase.fecha_finalizacion %}
+                    {{ fase.fecha_finalizacion|timesince:fase.fecha_inicio }}
+                {% else %}
+                    En progreso
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

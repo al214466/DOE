@@ -73,13 +73,26 @@
             background-color: #0077b6;
             border-color: #0077b6;
         }
+        .chat-icon {
+            color: white; /* Relleno blanco */
+            -webkit-text-stroke: 1px black; /* Contorno negro */
+            font-size: 1.2rem; /* Ajusta el tamaño si lo necesitas */
+        }
     </style>
 </head>
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
-        <a href="#" title="Inicio"><i class="fas fa-home icon"></i></a>
+        <a href="{% url 'listar_doe' %}" title="Inicio"><i class="fas fa-home icon"></i></a>
         <a href="#" title="Estadísticas"><i class="fas fa-chart-line icon"></i></a>
+    
+        <!-- SOLO PARA INGENIEROS: Botón para Equipos -->
+        {% if user.rol == "Sr" %}
+            <a href="{% url 'crear_equipo' %}" title="Crear Equipos">
+                <i class="fas fa-users icon"></i> <!-- Icono de equipo -->
+            </a>
+        {% endif %}
+    
         <a href="#" title="Cerrar Sesión"><i class="fas fa-sign-out-alt icon"></i></a>
     </div>
 
@@ -87,73 +100,181 @@
     <div class="content">
         <nav class="navbar navbar-expand-lg">
             <div class="container-fluid">
-                <span class="navbar-brand mb-0 h1">Bienvenido, {{ user.username }}</span>
+                <span class="navbar-brand mb-0 h1">
+                    Bienvenido, {{ user.username }} 
+                    {% if equipos_usuario.exists %}
+                        - Equipo: 
+                        {% for equipo in equipos_usuario %}
+                            <strong>{{ equipo.nombre }}</strong>{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <span class="text-muted">(No asignado)</span>
+                    {% endif %}
+                </span>
             </div>
         </nav>
-        <div class="container mt-4">
-            <div class="table-container">
-                <div class="search-bar">
-                    <h2>DOE Activos</h2>
-                    <div>
-                        <a href="{% url 'agregar_doe' %}" class="btn btn-success">
-                            <i class="fas fa-plus"></i> Agregar DOE
-                        </a>
-                        <input type="text" id="search" class="form-control d-inline-block" placeholder="Buscar por ID o Título" style="width: 300px; margin-left: 10px;">
+            <div class="container mt-4">
+                <div class="table-container">
+                    <div class="search-bar">
+                        <h2>DOE Activos</h2>
+                        <div>
+                            {% if user.is_authenticated and user.rol == "Sr" %}
+                                <a href="{% url 'agregar_doe' %}" class="btn btn-success">
+                                    <i class="fas fa-plus"></i> Agregar DOE
+                                </a>
+                            {% endif %}
+                            <input type="text" id="search" class="form-control d-inline-block" placeholder="Buscar por ID o Título" style="width: 300px; margin-left: 10px;">
+                        </div>
                     </div>
+                    <table class="table table-striped">
+                      
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Título</th>
+                                <th>Equipo</th>
+                                <th>Fase Actual</th>
+                                <th>Prioridad</th>
+                                <th>Detalles</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doe in does %}
+                            <tr class="{% if doe.finalizado %} table-success {% endif %}">
+                                <td>{{ doe.id }}</td>
+                                <td>{{ doe.titulo }}</td>
+                                <td>
+                                    {% if doe.equipo %}
+                                        {{ doe.equipo.nombre }}
+                                    {% else %}
+                                        <span class="text-muted">No asignado</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if doe.fase_actual %}
+                                        {{ doe.get_fase_actual_display }}
+                                    {% else %}
+                                        <span class="text-muted">No asignada</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if doe.prioridad == "High" %}
+                                        <span class="badge bg-danger">🔴 High</span>
+                                    {% elif doe.prioridad == "Medium" %}
+                                        <span class="badge bg-primary">🔵 Medium</span>
+                                    {% elif doe.prioridad == "Low" %}
+                                        <span class="badge bg-success">🟢 Low</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">⚪ N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <p>{{ doe.descripcion }}</p>
+                                    {% if doe.archivo_te %}
+                                        <a href="{{ doe.archivo_te.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                            📂 Ver Archivo
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">No adjunto</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'editar_doe' doe.id %}" class="text-primary"><i class="fas fa-edit"></i></a>
+                                    <a href="{% url 'ver_archivos' doe.id %}" class="text-warning"><i class="fas fa-folder"></i></a>
+                                    <a href="{% url 'ver_estadisticas' doe.id %}" class="text-primary"><i class="fas fa-chart-bar"></i></a>
+                                    <a href="{% url 'chat_doe' doe.id %}" class="text-primary"><i class="fas fa-comments"></i></a>
+                                    {% if user.rol == "Sr" %}
+                                        <a href="#" class="text-danger eliminar-doe" data-doe-id="{{ doe.id }}">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            
+                        </tbody>
+                    </table>
                 </div>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Título</th>
-                            <th>Estado</th>
-                            <th>Fecha Creación</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for doe in does %}
-                        <tr>
-                            <td>{{ doe.id }}</td>
-                            <td>{{ doe.titulo }}</td>
-                            <td>{{ doe.get_fase_actual_display }}</td> <!-- Mostrar el estado (nombre legible de la fase) -->
-                            <td>{{ doe.fecha_creacion }}</td>
-                            <td>
-                                <a href="{% url 'editar_doe' doe.id %}" class="btn btn-sm btn-primary">Editar</a>
-                                {% if user.rol == 'Sr' %}
-                                <a href="/doe/{{ doe.id }}/eliminar" class="btn btn-sm btn-danger">Eliminar</a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5">No hay DOE activos.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            </div>
+    </div>
+
+    <div id="comentarioModal" class="modal fade" tabindex="-1" aria-labelledby="comentarioModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Comentario para el DOE</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <textarea id="comentario-texto" class="form-control" rows="3" placeholder="Escribe tu comentario aquí..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" id="guardar-comentario">Guardar</button>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- CSRF Token -->
+    <input type="hidden" id="csrf_token" value="{{ csrf_token }}">
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
     <script>
-        // Script para filtrar filas por ID o título
-        document.getElementById('search').addEventListener('input', function() {
-            const searchValue = this.value.toLowerCase();
-            const rows = document.querySelectorAll('#doe-table tr');
-            rows.forEach(row => {
-                const id = row.children[0].textContent.toLowerCase();
-                const title = row.children[1].textContent.toLowerCase();
-                if (id.includes(searchValue) || title.includes(searchValue)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
+        document.addEventListener("DOMContentLoaded", function () {
+            let comentarioDOEId = null;
+    
+            function getCSRFToken() {
+                return document.getElementById("csrf_token").value;
+            }
+    
+            // Manejar la eliminación de DOE
+            document.querySelectorAll(".eliminar-doe").forEach(function (btn) {
+                btn.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    let doeId = this.getAttribute("data-doe-id");
+                    
+                    console.log("Intentando eliminar DOE con ID:", doeId); // DEPURACIÓN
+    
+                    if (doeId) {
+                        if (confirm("¿Estás seguro de que deseas eliminar este DOE? Esta acción no se puede deshacer.")) {
+                            window.location.href = "/eliminar_doe/" + doeId + "/";
+                        }
+                    } else {
+                        console.error("Error: DOE ID no encontrado");
+                    }
+                });
+            });
+    
+            // Manejo de comentarios
+            document.getElementById("guardar-comentario").addEventListener("click", function () {
+                let comentario = document.getElementById("comentario-texto").value;
+    
+                fetch(`/agregar_comentario/${comentarioDOEId}/`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCSRFToken()
+                    },
+                    body: JSON.stringify({ comentario: comentario })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        let modal = bootstrap.Modal.getInstance(document.getElementById("comentarioModal"));
+                        modal.hide();
+                        alert("Comentario guardado exitosamente.");
+                    } else {
+                        alert("Error al guardar el comentario.");
+                    }
+                })
+                .catch(error => console.error("Error al guardar comentario:", error));
             });
         });
     </script>
+    
 </body>
 </html>
