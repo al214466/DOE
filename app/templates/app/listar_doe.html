@@ -140,60 +140,62 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for doe in does %}
-                            <tr class="{% if doe.finalizado %} table-success {% endif %}">
-                                <td>{{ doe.id }}</td>
-                                <td>{{ doe.titulo }}</td>
-                                <td>
-                                    {% if doe.equipo %}
-                                        {{ doe.equipo.nombre }}
-                                    {% else %}
-                                        <span class="text-muted">No asignado</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if doe.fase_actual %}
-                                        {{ doe.get_fase_actual_display }}
-                                    {% else %}
-                                        <span class="text-muted">No asignada</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if doe.prioridad == "High" %}
-                                        <span class="badge bg-danger">🔴 High</span>
-                                    {% elif doe.prioridad == "Medium" %}
-                                        <span class="badge bg-primary">🔵 Medium</span>
-                                    {% elif doe.prioridad == "Low" %}
-                                        <span class="badge bg-success">🟢 Low</span>
-                                    {% else %}
-                                        <span class="badge bg-secondary">⚪ N/A</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <p>{{ doe.descripcion }}</p>
-                                    {% if doe.archivo_te %}
-                                        <a href="{{ doe.archivo_te.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
-                                            📂 Ver Archivo
-                                        </a>
-                                    {% else %}
-                                        <span class="text-muted">No adjunto</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <a href="{% url 'editar_doe' doe.id %}" class="text-primary"><i class="fas fa-edit"></i></a>
-                                    <a href="{% url 'ver_archivos' doe.id %}" class="text-warning"><i class="fas fa-folder"></i></a>
-                                    <a href="{% url 'ver_estadisticas' doe.id %}" class="text-primary"><i class="fas fa-chart-bar"></i></a>
-                                    <a href="{% url 'chat_doe' doe.id %}" class="text-primary"><i class="fas fa-comments"></i></a>
-                                    {% if user.rol == "Sr" %}
-                                        <a href="#" class="text-danger eliminar-doe" data-doe-id="{{ doe.id }}">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </a>
-                                    {% endif %}
-                                </td>
-                            </tr>
+                            {% for doe in does|dictsort:"finalizado" %}
+                                {% if user.rol == "Sr" or doe.equipo in equipos_usuario %} 
+                                <tr class="{% if doe.finalizado %} table-success {% endif %}">
+                                    <td>{{ doe.id }}</td>
+                                    <td>{{ doe.titulo }}</td>
+                                    <td>
+                                        {% if doe.equipo %}
+                                            {{ doe.equipo.nombre }}
+                                        {% else %}
+                                            <span class="text-muted">No asignado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if doe.fase_actual %}
+                                            {{ doe.get_fase_actual_display }}
+                                        {% else %}
+                                            <span class="text-muted">No asignada</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if doe.prioridad == "High" %}
+                                            <span class="badge bg-danger">🔴 High</span>
+                                        {% elif doe.prioridad == "Medium" %}
+                                            <span class="badge bg-primary">🔵 Medium</span>
+                                        {% elif doe.prioridad == "Low" %}
+                                            <span class="badge bg-success">🟢 Low</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">⚪ N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <p>{{ doe.descripcion }}</p>
+                                        {% if doe.archivo_te %}
+                                            <a href="{{ doe.archivo_te.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                                📂 Ver Archivo
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">No adjunto</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'editar_doe' doe.id %}" class="text-primary"><i class="fas fa-edit"></i></a>
+                                        <a href="{% url 'ver_archivos' doe.id %}" class="text-warning"><i class="fas fa-folder"></i></a>
+                                        <a href="{% url 'ver_estadisticas' doe.id %}" class="text-primary"><i class="fas fa-chart-bar"></i></a>
+                                        <a href="{% url 'chat_doe' doe.id %}" class="text-primary"><i class="fas fa-comments"></i></a>
+                                        {% if user.rol == "Sr" %}
+                                            <a href="#" class="text-danger eliminar-doe" data-doe-id="{{ doe.id }}">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endif %}
                             {% endfor %}
-                            
                         </tbody>
+
                     </table>
                 </div>
             </div>
